@@ -4,12 +4,12 @@
   "description": "Find shortest path through a network of GeoJSON",
   "repository": "git@github.com:perliedman/geojson-path-finder.git",
   "homepage": "https://github.com/perliedman/geojson-path-finder",
-  "main": "index.js",
+  "main": "src/index.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "test": "tap test/*.js | tap-spec"
+    "test": "tap test/*.js"
   },
   "author": "Per Liedman <per@liedman.net>",
   "license": "ISC",
