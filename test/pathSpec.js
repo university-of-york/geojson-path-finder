@@ -1,16 +1,22 @@
-var PathFinder = require('../'),
+var PathFinder = require('../src/PathFinder'),
     geojson = require('./network.json'),
     test = require('tap').test,
     point = require('turf-point'),
     distance = require('@turf/distance').default;
 
-test('can create PathFinder', function(t) {
+const options = {
+    precision: 1e-5,
+    keyFn: (c) => c.join(','),
+    weightFn: (a, b) => distance(point(a), point(b)),
+};
+
+test('can create PathFinder', function (t) {
     var pathfinder = new PathFinder(geojson);
     t.ok(pathfinder);
     t.end();
 });
 
-test('can find path (simple)', function(t) {
+test('can find path (simple)', function (t) {
     var network = {
         type: 'FeatureCollection',
         features: [
@@ -18,17 +24,23 @@ test('can find path (simple)', function(t) {
                 type: 'Feature',
                 geometry: {
                     type: 'LineString',
-                    coordinates: [[0, 0], [1, 0]]
-                }
+                    coordinates: [
+                        [0, 0],
+                        [1, 0],
+                    ],
+                },
             },
             {
                 type: 'Feature',
                 geometry: {
                     type: 'LineString',
-                    coordinates: [[1, 0], [1, 1]]
-                }
-            }
-        ]
+                    coordinates: [
+                        [1, 0],
+                        [1, 1],
+                    ],
+                },
+            },
+        ],
     };
 
     var pathfinder = new PathFinder(network),
@@ -41,7 +53,7 @@ test('can find path (simple)', function(t) {
     t.end();
 });
 
-test('can find path (medium)', function(t) {
+test('can find path (medium)', function (t) {
     var network = {
         type: 'FeatureCollection',
         features: [
@@ -49,24 +61,34 @@ test('can find path (medium)', function(t) {
                 type: 'Feature',
                 geometry: {
                     type: 'LineString',
-                    coordinates: [[0, 0], [1, 0]]
-                }
+                    coordinates: [
+                        [0, 0],
+                        [1, 0],
+                    ],
+                },
             },
             {
                 type: 'Feature',
                 geometry: {
                     type: 'LineString',
-                    coordinates: [[1, 0], [1, 1]]
-                }
+                    coordinates: [
+                        [1, 0],
+                        [1, 1],
+                    ],
+                },
             },
             {
                 type: 'Feature',
                 geometry: {
                     type: 'LineString',
-                    coordinates: [[1, 0], [0, 1], [1, 1]]
-                }
-            }
-        ]
+                    coordinates: [
+                        [1, 0],
+                        [0, 1],
+                        [1, 1],
+                    ],
+                },
+            },
+        ],
     };
 
     var pathfinder = new PathFinder(network),
@@ -79,9 +101,12 @@ test('can find path (medium)', function(t) {
     t.end();
 });
 
-test('can find path (complex)', function(t) {
+test('can find path (complex)', function (t) {
     var pathfinder = new PathFinder(geojson),
-        path = pathfinder.findPath(point([8.44460166,59.48947469]), point([8.44651,59.513920000000006]));
+        path = pathfinder.findPath(
+            point([8.44460166, 59.48947469]),
+            point([8.44651, 59.513920000000006])
+        );
 
     t.ok(path, 'has path');
     t.ok(path.path, 'path has vertices');
@@ -91,14 +116,14 @@ test('can find path (complex)', function(t) {
     t.end();
 });
 
-test('can\'t find path (advent of code)', function(t) {
+test("can't find path (advent of code)", function (t) {
     try {
         new PathFinder(require('./advent24.json'), {
-            weightFn: function(a, b) {
+            weightFn: function (a, b) {
                 var dx = a[0] - b[0];
                 var dy = a[1] - b[1];
                 return Math.sqrt(dx * dx + dy * dy);
-            }
+            },
         });
         t.fail('Expected to throw exception for trivial topology');
         t.end();
@@ -107,7 +132,7 @@ test('can\'t find path (advent of code)', function(t) {
     }
 });
 
-test('can make oneway network', function(t) {
+test('can make oneway network', function (t) {
     var network = {
         type: 'FeatureCollection',
         features: [
@@ -115,25 +140,31 @@ test('can make oneway network', function(t) {
                 type: 'Feature',
                 geometry: {
                     type: 'LineString',
-                    coordinates: [[0, 0], [1, 0]]
-                }
+                    coordinates: [
+                        [0, 0],
+                        [1, 0],
+                    ],
+                },
             },
             {
                 type: 'Feature',
                 geometry: {
                     type: 'LineString',
-                    coordinates: [[1, 0], [1, 1]]
-                }
-            }
-        ]
+                    coordinates: [
+                        [1, 0],
+                        [1, 1],
+                    ],
+                },
+            },
+        ],
     };
 
     var pathfinder = new PathFinder(network, {
-            weightFn: function(a, b) {
+            weightFn: function (a, b) {
                 return {
-                    forward: distance(point(a), point(b))
+                    forward: distance(point(a), point(b)),
                 };
-            }        
+            },
         }),
         path = pathfinder.findPath(point([0, 0]), point([1, 1]));
 
@@ -147,11 +178,14 @@ test('can make oneway network', function(t) {
     t.end();
 });
 
-test('can recreate PathFinder from serialized data', function(t) {
+test('can recreate PathFinder from serialized data', function (t) {
     var pathfinder = new PathFinder(geojson);
 
     pathfinder = new PathFinder(pathfinder.serialize());
-    var path = pathfinder.findPath(point([8.44460166,59.48947469]), point([8.44651,59.513920000000006]));
+    var path = pathfinder.findPath(
+        point([8.44460166, 59.48947469]),
+        point([8.44651, 59.513920000000006])
+    );
 
     t.ok(path, 'has path');
     t.ok(path.path, 'path has vertices');
@@ -161,23 +195,32 @@ test('can recreate PathFinder from serialized data', function(t) {
     t.end();
 });
 
-test('can reduce data on edges', function(t) {
+test('can reduce data on edges', function (t) {
     var pathfinder = new PathFinder(geojson, {
-            edgeDataReduceFn: function(a, p) { return {id: p.id}; },
-            edgeDataSeed: -1
+            edgeDataReduceFn: function (a, p) {
+                return { id: p.id };
+            },
+            edgeDataSeed: -1,
         }),
-        path = pathfinder.findPath(point([8.44460166,59.48947469]), point([8.44651,59.513920000000006]));
+        path = pathfinder.findPath(
+            point([8.44460166, 59.48947469]),
+            point([8.44651, 59.513920000000006])
+        );
 
     t.ok(path, 'has path');
     t.ok(path.edgeDatas, 'has edge datas');
-    t.ok(path.edgeDatas.every(function(e) { return e; }));
+    t.ok(
+        path.edgeDatas.every(function (e) {
+            return e;
+        })
+    );
 
     t.end();
 });
 
 function edgeReduce(a, p) {
-    var a_arr = (a && a.id) ? a.id : [];
-    if(typeof p.id === 'number') {
+    var a_arr = a && a.id ? a.id : [];
+    if (typeof p.id === 'number') {
         a_arr.push(p.id);
     } else {
         p.id.forEach(function (id) {
@@ -187,27 +230,36 @@ function edgeReduce(a, p) {
     return { id: Array.from(new Set(a_arr)) };
 }
 
-test('captures all edge data', function(t) {
+test('captures all edge data', function (t) {
     var pathfinder = new PathFinder(geojson, {
             edgeDataReduceFn: edgeReduce,
-            edgeDataSeed: -1
+            edgeDataSeed: -1,
         }),
-        path = pathfinder.findPath(point([8.44460166,59.48947469]), point([8.44651,59.513920000000006]));
+        path = pathfinder.findPath(
+            point([8.44460166, 59.48947469]),
+            point([8.44651, 59.513920000000006])
+        );
 
     t.ok(path, 'has path');
     t.ok(path.edgeDatas, 'has edge datas');
-    t.ok(path.edgeDatas.some(function(e) { return (e.reducedEdge.id.indexOf(2001) >-1); }));
+    t.ok(
+        path.edgeDatas.some(function (e) {
+            return e.reducedEdge.id.indexOf(2001) > -1;
+        })
+    );
 
     t.end();
 });
 
-test('finding a path between nodes not in original graph', function(t) {
+test('finding a path between nodes not in original graph', function (t) {
     var pathfinder = new PathFinder(geojson, {
-            edgeDataReduceFn: function(a, p) { return {id: p.id}; },
-            edgeDataSeed: -1
+            edgeDataReduceFn: function (a, p) {
+                return { id: p.id };
+            },
+            edgeDataSeed: -1,
         }),
-        path = pathfinder.findPath(point([8.3,59.3]), point([8.5,59.6]));
+        path = pathfinder.findPath(point([8.3, 59.3]), point([8.5, 59.6]));
 
     t.false(path);
     t.end();
-})
+});
