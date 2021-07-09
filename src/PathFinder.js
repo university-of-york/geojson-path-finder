@@ -19,7 +19,14 @@ class PathFinder {
             precision: 1e-5,
             compact: true,
             keyFn: (c) => c.join(','),
-            weightFn: (a, b) => distance(point(a), point(b)),
+            weightFn: (a, b, props) => {
+                let altitudeDiff = Math.abs(b[2] - a[2]);
+                if (isNaN(altitudeDiff)) {
+                    altitudeDiff = 0;
+                }
+
+                return distance(point(a), point(b)) + altitudeDiff;
+            },
             ...options,
         };
 

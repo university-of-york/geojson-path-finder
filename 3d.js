@@ -1,8 +1,22 @@
 const { PathFinder } = require('./src');
+const point = require('turf-point');
+const distance = require('@turf/distance').default;
 const network = require('./data/3d.json');
 
 const edgeDataReduceFn = (seed, props) => props;
-const pathFinder = new PathFinder(network, { precision: 1e-9, edgeDataReduceFn });
+const weightFn = (a, b, props) => {
+    if (props.Stairs) {
+        return null;
+    }
+
+    let altitudeDiff = Math.abs(b[2] - a[2]);
+    if (isNaN(altitudeDiff)) {
+        altitudeDiff = 0;
+    }
+
+    return distance(point(a), point(b)) + altitudeDiff;
+};
+const pathFinder = new PathFinder(network, { precision: 1e-9, edgeDataReduceFn, weightFn });
 
 const start = {
     type: 'Feature',
