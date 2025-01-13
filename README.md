@@ -1,5 +1,12 @@
 # GeoJSON Path Finder
 
+This is a small chrome extension to change the color of the AWS header bar depending on the account you have open. It's aimed to indicate increasing danger as you move towards production.
+
+ - Repo-Status: Retired
+ - Repo-Retirement-Date: 2025-01-12
+ - Repo-Retirement-Type: Immediate deletion
+ - Repo-Retirement-Note: This fork was never used and has not been maintained
+
 ## The Graph object
 
 Internally this library creates a Graph object that has a number of parts that are worth understanding when making changes to the library. These are broken down as follows:
